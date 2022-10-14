@@ -209,7 +209,10 @@ def add_click_priors(query_obj, user_query, priors_gb):
             # Create a string object of SKUs and weights that will boost documents matching the SKU
             clicks_by_sku = prior_clicks_for_query.groupby("sku").size()
             query_count = clicks_by_sku.sum()
-            click_prior = " ".join([str(sku)+"^"+str(sku_click_count/query_count) for sku,sku_click_count in clicks_by_sku.items()])            
+            # Filter sku's below threshold
+            filtered_count = [(sku,sku_click_count) for sku,sku_click_count in clicks_by_sku.items() if sku_click_count/query_count > 0.001]
+            # Create boost query
+            click_prior = " ".join([str(sku)+"^"+str(sku_click_count/query_count) for sku,sku_click_count in filtered_count])            
             if click_prior != "":
                 # Implement a query object that matches on the ID or SKU with weights of
                 # This may feel like cheating, but it's really not, esp. in ecommerce where you have all this prior data,
@@ -217,7 +220,7 @@ def add_click_priors(query_obj, user_query, priors_gb):
                     "query_string": {
                         "query": click_prior,
                         "fields": ["sku"],
-                        "boost": 100
+                        "boost": 1000
                      }
                  }                  
                 if click_prior_query_obj is not None:
