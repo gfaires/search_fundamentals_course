@@ -208,7 +208,7 @@ def add_click_priors(query_obj, user_query, priors_gb):
             #### W2, L1, S1
             # Create a string object of SKUs and weights that will boost documents matching the SKU
             clicks_by_sku = prior_clicks_for_query.groupby("sku").size()
-            query_count = clicks_by_sku.count()
+            query_count = clicks_by_sku.sum()
             click_prior = " ".join([str(sku)+"^"+str(sku_click_count/query_count) for sku,sku_click_count in clicks_by_sku.items()])            
             if click_prior != "":
                 # Implement a query object that matches on the ID or SKU with weights of
